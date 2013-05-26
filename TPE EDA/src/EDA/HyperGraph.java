@@ -1,5 +1,7 @@
 package EDA;
 
+import Node;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -13,6 +15,8 @@ public class HyperGraph {
 	
 	private Map<String, HyperArc> arcs;
 	private Map<String, Node> nodes;
+	private Node source;
+	private Node sink;
 	
 	public static void main(String args[]){
 		HyperGraph hg = new HyperGraph("test.hg");
@@ -33,6 +37,13 @@ public class HyperGraph {
 
 			nodes = new HashMap<String, Node>();
 			arcs = new HashMap<String, HyperArc>();
+			
+			String aux = sc.nextLine();
+			source = new Node(aux);
+			nodes.put(aux, source);
+			aux = sc.nextLine();
+			sink = new Node(aux);
+			nodes.put(aux, sink);
 			
 			while (sc.hasNext()){
 				
@@ -141,12 +152,6 @@ public class HyperGraph {
 	public HyperGraph criticalPath(){
 		
 		Queue<Node> q = new LinkedList<Node>();
-		
-		//graph.clearMarks();
-		//Hardcodeado
-		Node source = nodes.get("A");
-		Node sink = nodes.get("K");
-		
 		
 		//Recorre, asigna pesos y antecesores
 		source.weight = 0;
