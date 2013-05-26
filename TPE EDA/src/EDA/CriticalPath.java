@@ -2,20 +2,20 @@ package EDA;
 
 public class CriticalPath {
 	public static void main(String[] args) {
-		if (args.length == 0) {
-			System.out.println("Ingrese un archivo");
+		if (args.length <= 1) {
+			System.out.println("Ingrese un archivo y un comando.");
 			return;
 		}
 
 		HyperGraph graph = new HyperGraph(args[0]);
 
-		if (args[1] == "exact" || args[1] == null) {
+		if (args[1].equals("exact") && args.length ==  2 ) {
 			exactAlg(graph);
 			return;
 		}
 
-		if (args[1] == "approx" && args[2] != null) {
-			int time = Integer.getInteger(args[2]);
+		if (args[1].equals("approx") && args.length == 3) {
+			int time = Integer.parseInt(args[2]);
 			approxAlg(graph, time);
 			return;
 		}
