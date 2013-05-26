@@ -1,33 +1,48 @@
 package EDA;
 
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 
 public class Node{
 
 	String name;
 	int weight;
-	List<HyperArc> arcs;
+	List<HyperArc> heads;
+	List<HyperArc> tails;
 	Set<HyperArc> preds;
 	
 	public Node(String name){
 		this.name = name;
 		this.weight = Integer.MAX_VALUE;
-		this.arcs = new LinkedList<HyperArc>();
+		this.heads = new LinkedList<HyperArc>();
+		this.tails = new LinkedList<HyperArc>();
 		this.preds = new HashSet<HyperArc>();
 	}
 	
 	public Node(String name, List<HyperArc> arcs, Set<HyperArc> preds){
 		this.name = name;
 		this.weight = Integer.MAX_VALUE;
-		this.arcs = new LinkedList<HyperArc>(arcs);
+		this.heads = new LinkedList<HyperArc>(arcs);
 		this.preds = new HashSet<HyperArc>(preds);
 	}
 	
-	public void addArc(HyperArc arc){
-		arcs.add(arc);
+	public void addHead(HyperArc arc){
+		heads.add(arc);
 	}
 	
-	public void removeArc(HyperArc arc){
-		arcs.remove(arc);
+	public void removeHead(HyperArc arc){
+		heads.remove(arc);
+	}
+	
+	public void addTail(HyperArc arc){
+		tails.add(arc);
+	}
+	
+	public void removeTail(HyperArc arc){
+		tails.remove(arc);
 	}
 	
 	@Override

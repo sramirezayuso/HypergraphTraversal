@@ -53,6 +53,7 @@ public class HyperGraph {
 						node = new Node(nodeName);
 					else
 						node = nodes.get(nodeName);
+					node.addTail(arc);
 					nodes.put(nodeName, node);
 					arc.addHead(node);
 				}
@@ -67,7 +68,7 @@ public class HyperGraph {
 						node = new Node(nodeName);
 					else
 						node = nodes.get(nodeName);
-					node.addArc(arc);
+					node.addHead(arc);
 					nodes.put(nodeName, node);
 					arc.addTail(node);
 				}
@@ -89,7 +90,7 @@ public class HyperGraph {
 			bw.write("digraph " + fileName + " {\n");
 			
 			for (Node node : nodes.values()){
-				for (HyperArc arc : node.arcs){
+				for (HyperArc arc : node.heads){
 					bw.write(node.name + " -> " + arc.name + ";\n");
 				}
 			}
@@ -153,7 +154,7 @@ public class HyperGraph {
 		
 		while(!q.isEmpty()){
 			Node curr = q.poll();
-			for(HyperArc arc: curr.arcs){
+			for(HyperArc arc: curr.heads){
 				arc.counter++;
 				if(arc.counter == arc.tails.size()){
 					
@@ -171,7 +172,7 @@ public class HyperGraph {
 							if(!q.contains(head)){
 								q.offer(head);
 								if(head.weight < Integer.MAX_VALUE)
-									for(HyperArc forward: head.arcs)
+									for(HyperArc forward: head.heads)
 										forward.counter--;									
 							}
 							head.weight = upTo + arc.weight;
@@ -193,10 +194,10 @@ public class HyperGraph {
 			subArcs.put(pred.name, pred);
 		for(HyperArc arc : subArcs.values())
 			for(Node tail : arc.tails){
-				Node aux = new Node(tail.name, tail.arcs, tail.preds);
-				for(HyperArc auxArc : tail.arcs)
+				Node aux = new Node(tail.name, tail.heads, tail.preds);
+				for(HyperArc auxArc : tail.heads)
 					if(!subArcs.containsKey(auxArc.name))
-						aux.removeArc(auxArc);
+						aux.removeHead(auxArc);
 				subNodes.put(aux.name, aux);
 			}
 		
