@@ -10,6 +10,7 @@ public class HyperArc{
 	String name;
 	int counter;
 	int weight;
+	boolean mark;
 	List<Node> tails;
 	List<Node> heads;
 	Set<HyperArc> preds;
@@ -19,6 +20,7 @@ public class HyperArc{
 		this.name = name;
 		this.weight = weight;
 		this.counter = 0;
+		this.mark = false;
 		this.tails = new LinkedList<Node>();
 		this.heads = new LinkedList<Node>();
 		this.preds = new HashSet<HyperArc>();
@@ -38,6 +40,18 @@ public class HyperArc{
 	
 	public void removeTail(Node node){
 		tails.remove(node);
+	}
+	
+	public boolean isMarked(){
+		return this.mark;
+	}
+	
+	public void mark(){
+		this.mark = true;
+	}
+	
+	public void unmark(){
+		this.mark = false;
 	}
 	
 	@Override
