@@ -48,7 +48,7 @@ public class Node{
 	@Override
 	public String toString() {
 		String answer =  name + " Arcs: ";
-		for ( HyperArc arc : arcs){
+		for ( HyperArc arc : heads){
 			answer = answer + arc.name + " ";
 		}
 		return answer;
