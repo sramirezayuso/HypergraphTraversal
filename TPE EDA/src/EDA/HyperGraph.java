@@ -16,16 +16,17 @@ public class HyperGraph {
 	
 	public static void main(String args[]){
 		HyperGraph hg = new HyperGraph("test.hg");
-		hg.graphToGraphviz("test");
-		hg.criticalPath().graphToGraphviz("criticalPath");
+		HyperGraph criticalPath = hg.criticalPath();
+		criticalPath.graphToGraphviz("criticalPath");
+		criticalPath.graphToFile("criticalPath");
 	}
 	
-	private HyperGraph(Map<String, Node> nodes, Map<String, HyperArc> arcs){
+	public HyperGraph(Map<String, Node> nodes, Map<String, HyperArc> arcs){
 		this.nodes =  nodes;
 		this.arcs =  arcs;
 	}
 	
-	HyperGraph(String file){
+	public HyperGraph(String file){
 		try{
 			Scanner sc = new Scanner(new File(file));
 			sc.useDelimiter("<|>");
@@ -71,27 +72,17 @@ public class HyperGraph {
 					arc.addTail(node);
 				}
 			}
-			
-			/*for (HyperArc arc: arcs.values()){
-				System.out.println(arc);
-			}
-			
-			for (Node node: nodes.values()){
-				System.out.println(node);
-			}*/
-			
 		} catch (Exception e){
 			System.err.println("Error: " + e.getMessage());
 		}
 	}
 	
 	private void graphToGraphviz(String fileName){
-		try{
+		try{	
 			
 			File file = new File(fileName + ".dot");
-			if (!file.exists()) {
+			if (!file.exists())
 				file.createNewFile();
-			}
 			FileWriter fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
 			
@@ -112,12 +103,38 @@ public class HyperGraph {
 			
 			bw.write("}");
 			bw.close();
-			
-			
+				
 		} catch (Exception e){
 			System.err.println("Error: " + e.getMessage());
 		}
 		
+	}
+	
+	private void graphToFile(String fileName){
+		try{	
+			
+			File file = new File(fileName + ".hg");
+			if (!file.exists())
+				file.createNewFile();
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			for(HyperArc arc : this.arcs.values()){
+				bw.write("<" + arc.name + ">");
+				bw.write(" <" + arc.weight + ">");
+				bw.write(" <" + arc.heads.size() + ">");
+				for(Node head : arc.heads)
+					bw.write(" <" + head.name + ">");
+				bw.write(" <" + arc.tails.size() + ">");
+				for(Node tail : arc.tails)
+					bw.write(" <" + tail.name + ">");
+				bw.write("\n");
+			}
+			
+			bw.close();
+		} catch (Exception e){
+			System.err.println("Error: " + e.getMessage());
+		}
 	}
 	
 	public HyperGraph criticalPath(){
@@ -130,58 +147,64 @@ public class HyperGraph {
 		Node sink = nodes.get("K");
 		
 		
-		//Recorre y asigna pesos y antecesores
+		//Recorre, asigna pesos y antecesores
 		source.weight = 0;
 		q.offer(source);
-		source.visited = true;
 		
 		while(!q.isEmpty()){
 			Node curr = q.poll();
 			for(HyperArc arc: curr.arcs){
 				arc.counter++;
 				if(arc.counter == arc.tails.size()){
+					
 					int upTo = 0;
+					
 					for(Node tail: arc.tails)
-						if(!arc.path.contains(tail.path)){
-							upTo += tail.weight;
-							arc.path.add(tail.path);
-						}
+						for(HyperArc pred : tail.preds)
+							if(!arc.preds.contains(pred)){
+								upTo += pred.weight;
+								arc.preds.add(pred);
+							}
+						
 					for(Node head : arc.heads){
 						if(head.weight > upTo + arc.weight){
 							if(!q.contains(head)){
 								q.offer(head);
-								if(head.weight < Integer.MAX_VALUE){
-									for(HyperArc forward: head.arcs){
-										forward.counter--;
-									}
-								}
+								if(head.weight < Integer.MAX_VALUE)
+									for(HyperArc forward: head.arcs)
+										forward.counter--;									
 							}
 							head.weight = upTo + arc.weight;
-							head.path = arc;
+							for(HyperArc pred : arc.preds)
+								head.preds.add(pred);
+							head.preds.add(arc);
 						}
 					}
 				}
 			}
 		}
 		
-		//Genera un Subgrafo, anda mal
-		Queue<Node> nodeQ = new LinkedList<Node>();
+		//Genera un Subgrafol
+		
 		Map<String, HyperArc> subArcs = new HashMap<String, HyperArc>();
 		Map<String, Node> subNodes = new HashMap<String, Node>();
 		
-		nodeQ.offer(sink);
-		while(!nodeQ.isEmpty()){
-			Node curr = nodeQ.poll();
-			subNodes.put(curr.name, curr);
-			if(curr == source)
-				break;
-			subArcs.put(curr.path.name, curr.path);
-			for(Node tail : curr.path.tails)
-				nodeQ.offer(tail);
-		}
+		for(HyperArc pred : sink.preds)
+			subArcs.put(pred.name, pred);
+		for(HyperArc arc : subArcs.values())
+			for(Node tail : arc.tails){
+				Node aux = new Node(tail.name, tail.arcs, tail.preds);
+				for(HyperArc auxArc : tail.arcs)
+					if(!subArcs.containsKey(auxArc.name))
+						aux.removeArc(auxArc);
+				subNodes.put(aux.name, aux);
+			}
 		
 		return new HyperGraph(subNodes, subArcs);
 	}
 
+	
+	
 }
+
 

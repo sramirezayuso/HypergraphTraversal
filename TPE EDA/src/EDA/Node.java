@@ -1,29 +1,34 @@
 package EDA;
 
-import java.util.LinkedList;
-import java.util.List;
 
 public class Node{
 
-
-	List<HyperArc> arcs;
 	String name;
-	HyperArc path;
 	int weight;
-	boolean visited;
+	List<HyperArc> arcs;
+	Set<HyperArc> preds;
 	
 	public Node(String name){
-		arcs = new LinkedList<HyperArc>();
 		this.name = name;
 		this.weight = Integer.MAX_VALUE;
-		this.visited = false;
-		this.path = null;
+		this.arcs = new LinkedList<HyperArc>();
+		this.preds = new HashSet<HyperArc>();
+	}
+	
+	public Node(String name, List<HyperArc> arcs, Set<HyperArc> preds){
+		this.name = name;
+		this.weight = Integer.MAX_VALUE;
+		this.arcs = new LinkedList<HyperArc>(arcs);
+		this.preds = new HashSet<HyperArc>(preds);
 	}
 	
 	public void addArc(HyperArc arc){
 		arcs.add(arc);
 	}
 	
+	public void removeArc(HyperArc arc){
+		arcs.remove(arc);
+	}
 	
 	@Override
 	public String toString() {
