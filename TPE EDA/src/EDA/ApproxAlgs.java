@@ -30,7 +30,13 @@ public class ApproxAlgs {
 				node = nodesIt.next();
 				arcsIt = node.arcs.iterator();//ARCS TIENE QUE SER LA LISTA DE ARCOS HACER UN GET 
 				while(arcsIt.hasNext() && !ready){
-					
+					arc = arcsIt.next();
+					if(arc.isVisited()){
+						ready = true;
+					}
+					else{
+						
+					}
 				}
 			}
 		}
