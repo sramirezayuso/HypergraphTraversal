@@ -1,7 +1,4 @@
 package EDA;
-
-import Node;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +16,7 @@ public class HyperGraph {
 	private Node sink;
 	
 	public static void main(String args[]){
-		HyperGraph hg = new HyperGraph("test.hg");
+		HyperGraph hg = new HyperGraph("A.hg");
 		HyperGraph criticalPath = hg.criticalPath();
 		criticalPath.graphToGraphviz("criticalPath");
 		criticalPath.graphToFile("criticalPath");
@@ -33,32 +30,35 @@ public class HyperGraph {
 	public HyperGraph(String file){
 		try{
 			Scanner sc = new Scanner(new File(file));
-			sc.useDelimiter("<|>");
 
 			nodes = new HashMap<String, Node>();
 			arcs = new HashMap<String, HyperArc>();
 			
-			String aux = sc.nextLine();
+			String aux;
+			do
+				aux = sc.nextLine();
+			while(aux.startsWith("#"));
 			source = new Node(aux);
-			nodes.put(aux, source);
-			aux = sc.nextLine();
+			nodes.put(aux, source);			
+			do
+				aux = sc.nextLine();
+			while(aux.startsWith("#"));
 			sink = new Node(aux);
 			nodes.put(aux, sink);
 			
 			while (sc.hasNext()){
-				
 				String name = sc.next();
-				sc.next();
+				if(name.startsWith("#")){
+					sc.nextLine();
+					continue;
+				}
 				int weight = sc.nextInt();
-				sc.next();
 				HyperArc arc = new HyperArc(weight, name);
 				arcs.put(name, arc);
 				
 				int heads = sc.nextInt();
-				sc.next();
 				for (int i = 0; i < heads; i++){
 					String nodeName = sc.next();
-					sc.next();
 					Node node;
 					if (!nodes.containsKey(nodeName))
 						node = new Node(nodeName);
@@ -70,10 +70,8 @@ public class HyperGraph {
 				}
 				
 				int tails = sc.nextInt();
-				sc.next();
 				for (int j = 0; j < tails; j++){
 					String nodeName = sc.next();
-					sc.next();
 					Node node;
 					if (!nodes.containsKey(nodeName))
 						node = new Node(nodeName);
@@ -132,14 +130,14 @@ public class HyperGraph {
 			BufferedWriter bw = new BufferedWriter(fw);
 			
 			for(HyperArc arc : this.arcs.values()){
-				bw.write("<" + arc.name + ">");
-				bw.write(" <" + arc.weight + ">");
-				bw.write(" <" + arc.heads.size() + ">");
+				bw.write(arc.name);
+				bw.write(" " + arc.weight);
+				bw.write(" " + arc.heads.size());
 				for(Node head : arc.heads)
-					bw.write(" <" + head.name + ">");
-				bw.write(" <" + arc.tails.size() + ">");
+					bw.write(" " + head.name);
+				bw.write(" " + arc.tails.size());
 				for(Node tail : arc.tails)
-					bw.write(" <" + tail.name + ">");
+					bw.write(" " + tail.name);
 				bw.write("\n");
 			}
 			
@@ -191,6 +189,9 @@ public class HyperGraph {
 		}
 		
 		//Genera un Subgrafol
+		
+
+		System.out.println(sink.weight);
 		
 		Map<String, HyperArc> subArcs = new HashMap<String, HyperArc>();
 		Map<String, Node> subNodes = new HashMap<String, Node>();
