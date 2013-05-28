@@ -1,4 +1,5 @@
 package EDA;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -17,9 +18,11 @@ public class HyperGraph {
 	
 	public static void main(String args[]){
 		HyperGraph hg = new HyperGraph("A.hg");
+		hg.graphToDot("A");
 		HyperGraph criticalPath = hg.criticalPath();
-		criticalPath.graphToGraphviz("criticalPath");
-		criticalPath.graphToFile("criticalPath");
+		hg.criticalToDot("highlighted", criticalPath);
+		criticalPath.graphToDot("criticalPath");
+		criticalPath.graphToHg("criticalPath");
 	}
 	
 	public HyperGraph(Map<String, Node> nodes, Map<String, HyperArc> arcs){
@@ -87,7 +90,7 @@ public class HyperGraph {
 		}
 	}
 	
-	private void graphToGraphviz(String fileName){
+	private void criticalToDot(String fileName, HyperGraph subgraph){
 		try{	
 			
 			File file = new File(fileName + ".dot");
@@ -98,29 +101,58 @@ public class HyperGraph {
 			
 			bw.write("digraph " + fileName + " {\n");
 			
-			for (Node node : nodes.values()){
-				for (HyperArc arc : node.heads){
-					bw.write(node.name + " -> " + arc.name + ";\n");
-				}
-			}
-			
-			for (HyperArc arc : arcs.values()){
-				bw.write(arc.name + "[shape=box, label=\"" + arc.name + "(" + arc.weight + ")\"]" + ";\n");
-				for (Node node : arc.heads){
-					bw.write(arc.name + " -> " + node.name + ";\n");
-				}
-			}
+			dataToDot(bw);
+			highlightDot(bw, subgraph);
 			
 			bw.write("}");
 			bw.close();
 				
 		} catch (Exception e){
 			System.err.println("Error: " + e.getMessage());
-		}
-		
+		}	
 	}
 	
-	private void graphToFile(String fileName){
+	private void graphToDot(String fileName){
+		try{	
+			
+			File file = new File(fileName + ".dot");
+			if (!file.exists())
+				file.createNewFile();
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			bw.write("digraph " + fileName + " {\n");
+			
+			dataToDot(bw);
+			
+			bw.write("}");
+			bw.close();
+				
+		} catch (Exception e){
+			System.err.println("Error: " + e.getMessage());
+		}		
+	}
+
+	private void dataToDot(BufferedWriter bw){
+		try{	
+			for (Node node : nodes.values()){
+				for (HyperArc arc : node.heads){
+					bw.write("\"" + node.name + "\"" + " -> " + "\"" + arc.name + "\"" + ";\n");
+				}
+			}
+			
+			for (HyperArc arc : arcs.values()){
+				bw.write("\"" + arc.name + "\"" + "[shape=box, label=\"" + arc.name + "(" + arc.weight + ")\"]" + ";\n");
+				for (Node node : arc.heads){
+					bw.write("\"" + arc.name + "\"" + " -> " + "\"" + node.name + "\"" + ";\n");
+				}
+			}
+		} catch (Exception e){
+			System.err.println("Error: " + e.getMessage());
+		}
+	}
+	
+	private void graphToHg(String fileName){
 		try{	
 			
 			File file = new File(fileName + ".hg");
@@ -145,6 +177,18 @@ public class HyperGraph {
 		} catch (Exception e){
 			System.err.println("Error: " + e.getMessage());
 		}
+	}
+
+	private void highlightDot(BufferedWriter bw, HyperGraph subgraph){
+		try{
+			for(HyperArc arc : subgraph.arcs.values())
+				bw.write("\"" + arc.name + "\"" + "[style=filled, fillcolor=red]" + ";\n");
+			for(Node node : subgraph.nodes.values())
+				bw.write("\"" + node.name + "\"" + "[style=filled, fillcolor=red]" + ";\n");
+		} catch (Exception e){
+			System.err.println("Error: " + e.getMessage());
+		}
+		
 	}
 	
 	public HyperGraph criticalPath(){
@@ -196,6 +240,7 @@ public class HyperGraph {
 		Map<String, HyperArc> subArcs = new HashMap<String, HyperArc>();
 		Map<String, Node> subNodes = new HashMap<String, Node>();
 		
+		subNodes.put(sink.name, sink);
 		for(HyperArc pred : sink.preds)
 			subArcs.put(pred.name, pred);
 		for(HyperArc arc : subArcs.values())
