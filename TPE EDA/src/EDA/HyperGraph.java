@@ -1,8 +1,10 @@
 package EDA;
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -17,17 +19,21 @@ public class HyperGraph {
 	private Node sink;
 	
 	public static void main(String args[]){
-		HyperGraph hg = new HyperGraph("A.hg");
+		HyperGraph hg = new HyperGraph("B.hg");
 		hg.graphToDot("A");
 		HyperGraph criticalPath = hg.criticalPath();
-		hg.criticalToDot("highlighted", criticalPath);
-		criticalPath.graphToDot("criticalPath");
+		hg.criticalToDot("highlightedA", criticalPath);
+		criticalPath.graphToDot("criticalPathA");
 		criticalPath.graphToHg("criticalPath");
 	}
 	
-	public HyperGraph(Map<String, Node> nodes, Map<String, HyperArc> arcs){
-		this.nodes =  nodes;
-		this.arcs =  arcs;
+	public HyperGraph(Collection<Node> nodes, Collection<HyperArc> arcs){
+		this.nodes = new HashMap<String, Node>();
+		this.arcs = new HashMap<String, HyperArc>();
+		for(Node node : nodes)
+			this.nodes.put(node.name, node);
+		for(HyperArc arc : arcs)
+			this.arcs.put(arc.name, arc);
 	}
 	
 	public HyperGraph(String file){
@@ -223,6 +229,7 @@ public class HyperGraph {
 										forward.counter--;									
 							}
 							head.weight = upTo + arc.weight;
+							head.preds.clear();
 							for(HyperArc pred : arc.preds)
 								head.preds.add(pred);
 							head.preds.add(arc);
@@ -252,7 +259,7 @@ public class HyperGraph {
 				subNodes.put(aux.name, aux);
 			}
 		
-		return new HyperGraph(subNodes, subArcs);
+		return new HyperGraph(subNodes.values(), subArcs.values());
 	}
 
 	
