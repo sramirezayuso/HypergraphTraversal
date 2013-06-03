@@ -1,12 +1,13 @@
 package EDA;
 
 
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class HyperArc{
+public class HyperArc implements Comparable<HyperArc>{
 	
 	String name;
 	int counter;
@@ -57,17 +58,25 @@ public class HyperArc{
 	
 	@Override
 	public String toString() {
-		String answer =  name + "(" + weight + ")" + " Heads: ";
-		for (Node node: heads){
-			answer = answer + node.name + " ";
-		}
-		answer += "\n" + " Tails: ";
-		for (Node node: tails){
-			answer = answer + node.name + " ";
-		}
+		String answer =  name + "(" + weight + ")" + " " ;
+//		for (Node node: heads){
+//			answer = answer + node.name + " ";
+//		}
+//		answer += "\n" + " Tails: ";
+//		for (Node node: tails){
+//			answer = answer + node.name + " ";
+//		}
+//		answer += "\n";
 		return answer;
 	}
 	
+	public int compareTo(HyperArc o){
+		return this.weight - o.weight;
+	}
 	
-	
+	public boolean equals(Object o){
+		if(o == null)
+			return false;
+		return this.name.equals(((HyperArc)o).name);
+	}
 }

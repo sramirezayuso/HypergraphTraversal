@@ -1,5 +1,6 @@
 package EDA;
 
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ public class ApproxAlgs {
 		hg.criticalToDot("highlightedA", criticalPath);
 		criticalPath.graphToDot("criticalPathA");
 		criticalPath.graphToHg("criticalPath");
+		
 	}
 	
 	public static HyperGraph approxAlg1(HyperGraph graph, Node sink, int time) {
@@ -49,10 +51,12 @@ public class ApproxAlgs {
 					}
 				}
 			}
-			System.out.println(pathweight);
-			System.out.println(minpathnodes);
+			//System.out.println(pathweight);
+			//System.out.println(minpathnodes);
+			//System.out.println(minpath);
+			HyperGraph min = new HyperGraph(minpathnodes,minpath);
 			System.out.println(minpath);
-			return new HyperGraph(minpathnodes,minpath);
+			return min;
 	}
 
 	private static HyperArc minArc(Node node, List<HyperArc> minpath){
@@ -60,10 +64,10 @@ public class ApproxAlgs {
 		Boolean ready = false;
 		HyperArc arc = new HyperArc(0, null);;
 		HyperArc minarc = new HyperArc(0, null);
-		//if(!arcsIt.hasNext()) ESTO NO LO TIENE QUE HACER NUNCA PORQUE SI NO EL NODO SERÍA RAIZ
+		//if(!arcsIt.hasNext()) ESTO NO LO TIENE QUE HACER NUNCA PORQUE SI NO EL NODO SERï¿½A RAIZ
 //			return false;
 
-		while(arcsIt.hasNext() && !ready){//ESTO ENCUENTRA EL MÍNIMO ARCO  O UNO QUE YA ESTÉ MARCADO ARRIBA DE UN NODO
+		while(arcsIt.hasNext() && !ready){//ESTO ENCUENTRA EL Mï¿½NIMO ARCO  O UNO QUE YA ESTï¿½ MARCADO ARRIBA DE UN NODO
 			arc = arcsIt.next();
 			if(arc.isMarked()){
 				//if(arc != minarc) NO SE SI HACE FALTA ESTO, MEPA QUE NO

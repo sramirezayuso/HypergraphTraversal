@@ -14,6 +14,7 @@ public class Node{
 	List<HyperArc> heads;
 	List<HyperArc> tails;
 	Set<HyperArc> preds;
+	boolean mark;
 	
 	public Node(String name){
 		this.name = name;
@@ -21,13 +22,15 @@ public class Node{
 		this.heads = new LinkedList<HyperArc>();
 		this.tails = new LinkedList<HyperArc>();
 		this.preds = new HashSet<HyperArc>();
+		mark = false;
 	}
 	
 	public Node(String name, List<HyperArc> arcs, Set<HyperArc> preds){
 		this.name = name;
 		this.weight = Integer.MAX_VALUE;
 		this.heads = new LinkedList<HyperArc>(arcs);
-		this.preds = new HashSet<HyperArc>(preds);
+		this.preds = preds;
+		mark = false;
 	}
 	
 	public void addHead(HyperArc arc){
@@ -46,6 +49,17 @@ public class Node{
 		tails.remove(arc);
 	}
 	
+	public boolean isMarked(){
+		return mark;
+	}
+	
+	public void mark(){
+		mark = true;
+	}
+	
+	public void unmark(){
+		mark = false;
+	}
 	@Override
 	public String toString() {
 		String answer =  name + " Arcs: ";
