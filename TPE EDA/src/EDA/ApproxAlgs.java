@@ -11,18 +11,18 @@ public class ApproxAlgs {
 
 	
 	public static void main(String args[]){
-		HyperGraph hg = new HyperGraph("B.hg");
-		hg.graphToDot("A");
-		HyperGraph criticalPath = approxAlg1(hg,hg.sink,0);
-		hg.criticalToDot("highlightedA", criticalPath);
-		criticalPath.graphToDot("criticalPathA");
-		criticalPath.graphToHg("criticalPath");
+//		HyperGraph hg = new HyperGraph("B.hg");
+//		hg.graphToDot("A");
+//		HyperGraph criticalPath = approxAlg1(hg,hg.sink,0);
+//		hg.criticalToDot("highlightedA", criticalPath);
+//		criticalPath.graphToDot("criticalPathA");
+//		criticalPath.graphToHg("criticalPath");
 		
 	}
 	
-	public static HyperGraph approxAlg1(HyperGraph graph, Node sink, int time) {
-		List<HyperArc> minpath = new ArrayList<HyperArc>();
-		List<Node> minpathnodes = new ArrayList<Node>();
+	public static int approxAlg1(HyperGraph graph, Node sink, int time, List<Node> minpathnodes, List<HyperArc> minpath) {
+//		List<HyperArc> minpath = new ArrayList<HyperArc>();
+//		List<Node> minpathnodes = new ArrayList<Node>();
 		Queue<HyperArc> auxarcs = new LinkedList<HyperArc>();
 		HyperArc arc;
 		int pathweight = 0;
@@ -54,9 +54,16 @@ public class ApproxAlgs {
 			//System.out.println(pathweight);
 			//System.out.println(minpathnodes);
 			//System.out.println(minpath);
-			HyperGraph min = new HyperGraph(minpathnodes,minpath);
-			System.out.println(minpath);
-			return min;
+			for(Node anode: minpathnodes){
+				anode.mark();
+			}
+			for(HyperArc anarc: minpath){
+				anarc.mark();
+			}
+//			HyperGraph min = new HyperGraph(minpathnodes,minpath);
+//			System.out.println(minpath);
+//			return min;
+			return pathweight;
 	}
 
 	private static HyperArc minArc(Node node, List<HyperArc> minpath){
