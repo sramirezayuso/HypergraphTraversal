@@ -10,6 +10,7 @@ import java.util.Set;
 public class Node{
 
 	String name;
+	int counter;
 	int weight;
 	List<HyperArc> heads;
 	List<HyperArc> tails;
@@ -18,6 +19,7 @@ public class Node{
 	
 	public Node(String name){
 		this.name = name;
+		this.counter=0;
 		this.weight = Integer.MAX_VALUE;
 		this.heads = new LinkedList<HyperArc>();
 		this.tails = new LinkedList<HyperArc>();
@@ -25,11 +27,12 @@ public class Node{
 		mark = false;
 	}
 	
-	public Node(String name, List<HyperArc> arcs, Set<HyperArc> preds){
+	public Node(String name, List<HyperArc> arcs){
 		this.name = name;
+		this.counter = 0;
 		this.weight = Integer.MAX_VALUE;
 		this.heads = new LinkedList<HyperArc>(arcs);
-		this.preds = preds;
+		this.preds = new HashSet<HyperArc>();
 		mark = false;
 	}
 	
@@ -67,5 +70,30 @@ public class Node{
 			answer = answer + arc.name + " ";
 		}
 		return answer;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Node other = (Node) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
 	}
 }

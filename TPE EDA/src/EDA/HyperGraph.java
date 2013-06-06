@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.TreeSet;
+
 
 public class HyperGraph {
 
@@ -18,14 +18,16 @@ public class HyperGraph {
 	Map<String, Node> nodes;
 	Node source;
 	Node sink;
+	int minWeight;
+	Set<HyperArc> solution;
 
 	public static void main(String args[]) {
-		HyperGraph hg = new HyperGraph("A.hg");
-		hg.graphToDot("B");
-		HyperGraph criticalPath = hg.criticalPathInviable2();
-		hg.criticalToDot("highlightedB", criticalPath);
-		criticalPath.graphToDot("criticalPathB");
-		criticalPath.graphToHg("criticalPath");
+		HyperGraph hg = new HyperGraph("enunciado.hg");
+		hg.graphToDot("enunciado");
+		HyperGraph criticalPath = hg.exactPath();
+		hg.criticalToDot("highlightedEnunciado", criticalPath);
+		criticalPath.graphToDot("criticalPathEnunciado");
+		criticalPath.graphToHg("criticalPathEnunciado");
 	}
 
 	public HyperGraph(Collection<Node> nodes, Collection<HyperArc> arcs) {
@@ -35,6 +37,7 @@ public class HyperGraph {
 			this.nodes.put(node.name, node);
 		for (HyperArc arc : arcs)
 			this.arcs.put(arc.name, arc);
+		this.minWeight = Integer.MAX_VALUE;
 	}
 
 	public HyperGraph(String file) {
@@ -43,7 +46,8 @@ public class HyperGraph {
 
 			nodes = new HashMap<String, Node>();
 			arcs = new HashMap<String, HyperArc>();
-
+			this.minWeight = Integer.MAX_VALUE;
+			
 			String aux;
 			do
 				aux = sc.nextLine();
@@ -97,6 +101,23 @@ public class HyperGraph {
 		}
 	}
 
+	public HyperGraph(Collection<HyperArc> arcs, Node sink){
+		this.nodes = new HashMap<String, Node>();
+		this.arcs = new HashMap<String, HyperArc>();
+		
+		this.nodes.put(sink.name, sink);
+		for (HyperArc arc : arcs)
+			this.arcs.put(arc.name, arc);
+		for (HyperArc arc : this.arcs.values())
+			for (Node tail : arc.tails) {
+				Node aux = new Node(tail.name, tail.heads);
+				for (HyperArc auxArc : tail.heads)
+					if (!this.arcs.values().contains(auxArc))
+						aux.removeHead(auxArc);
+				this.nodes.put(aux.name, aux);
+			}
+	}
+	
 	void criticalToDot(String fileName, HyperGraph subgraph) {
 		try {
 
@@ -203,18 +224,64 @@ public class HyperGraph {
 
 	}
 
-	public static <T> Set<Set<T>> powerSet(Set<T> originalSet) {
-		Set<Set<T>> sets = new HashSet<Set<T>>();
-		if (originalSet.isEmpty()) {
-			sets.add(new HashSet<T>());
-			return sets;
+	public HyperGraph exactPath(){
+
+		source.mark();
+		
+		Queue<Node> queue = new LinkedList<Node>();
+		minWeight = startCriticalPath()+1;
+		clearMarks();
+		nodeRec(sink, queue);
+
+		return new HyperGraph(solution, sink);
+
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void nodeRec(Node node, Queue<Node> q){
+		q.poll();
+		if(node.equals(source)){
+			calcSolution();
+			return;
 		}
-		for (T elem : originalSet) {
-			Set<T> newSet = new HashSet<T>(originalSet);
-			newSet.remove(elem);
-			sets.add(newSet);
+		for(HyperArc arc: node.tails){
+			arc.counter++;
+			
+			int value = 0;
+			for(HyperArc globArc : arcs.values())
+				if(globArc.counter > 0)
+					value += globArc.weight;
+			if(value > minWeight){
+				arc.counter--;
+				return;
+			}			
+			
+			Queue<Node> auxQ = new LinkedList<Node>();
+			auxQ = (Queue<Node>)((((LinkedList<Node>)q).clone()));
+			for(Node tail: arc.tails){
+				if(!auxQ.contains(tail))
+					auxQ.offer(tail);
+			}
+
+			Node aux = auxQ.peek();
+			nodeRec(aux, auxQ);
+			
+			arc.counter--;
 		}
-		return sets;
+	}
+	
+	private void calcSolution(){
+		int value = 0;
+		Set<HyperArc> currSol = new HashSet<HyperArc>();
+		for(HyperArc arc : arcs.values())
+			if(arc.counter > 0){
+				value += arc.weight;
+				currSol.add(arc);
+			}
+		if (value < minWeight){
+			solution = currSol;
+			minWeight = value;
+		}
 	}
 
 	public void clearMarks() {
@@ -222,124 +289,10 @@ public class HyperGraph {
 			arc.unmark();
 			arc.counter = 0;
 		}
-		for (Node node : nodes.values())
+		for (Node node : nodes.values()){
 			node.unmark();
-	}
-
-	public HyperGraph criticalPathInviable2() {
-		Set<HyperArc> solution = new HashSet<HyperArc>();
-
-//		TreeSet<ArcSet> neighbors = new TreeSet<ArcSet>();
-//		TreeSet<ArcSet> auxqueue = new TreeSet<ArcSet>();
-//		Set<Set<HyperArc>> notSols = new HashSet<Set<HyperArc>>();
-//		for (HyperArc arc : arcs.values()) {
-//			ArcSet aux = new ArcSet();
-//			aux.addArc(arc);
-//			neighbors.add(aux);
-//		}
-//
-//		boolean cont = true;
-//		while(cont){
-//			solution = neighbors.pollFirst().arcs;
-//			clearMarks();
-//			for(HyperArc arc: solution)
-//				arc.mark();
-//			if(!isSolution()){
-//				notSols.add(solution);
-//				for(ArcSet neighbor : neighbors)
-//					auxqueue.add(new ArcSet(neighbor.arcs, solution));
-//				for(ArcSet arcSet : auxqueue){
-//					if(!notSols.contains(arcSet.arcs))
-//						neighbors.add(arcSet);
-//				}
-//			} else {
-//				cont = false;
-//			}
-//		}
-		
-		PowerSet pset = new PowerSet(arcs.values());
-		
-		boolean cont = true;
-		while(cont){
-			solution = pset.next();
-			System.out.println(solution);
-			clearMarks();
-			for(HyperArc arc: solution)
-				arc.mark();
-			if(isSolution())
-				cont = false;
+			node.counter = 0;
 		}
-		
-
-		Set<HyperArc> subArcs = new HashSet<HyperArc>();
-		Set<Node> subNodes = new HashSet<Node>();
-
-		subNodes.add(sink);
-		for (HyperArc arc : solution)
-			subArcs.add(arc);
-		for (HyperArc arc : subArcs)
-			for (Node tail : arc.tails) {
-				Node aux = new Node(tail.name, tail.heads, tail.preds);
-				for (HyperArc auxArc : tail.heads)
-					if (!subArcs.contains(auxArc))
-						aux.removeHead(auxArc);
-				subNodes.add(aux);
-			}
-		int value = 0;
-		for(HyperArc arc : solution)
-			value += arc.weight;
-		System.out.println(value);
-		return new HyperGraph(subNodes, subArcs);
-	}
-
-	public HyperGraph criticalPathInviable() {
-		int min = Integer.MAX_VALUE;
-		Set<HyperArc> solution = new HashSet<HyperArc>();
-
-		Set<HyperArc> arcSet = new TreeSet<HyperArc>(arcs.values());
-		int size = arcSet.size();
-
-		clearMarks();
-		min = Math.min(criticalRec(arcSet, size), min);
-
-		Set<HyperArc> subArcs = new HashSet<HyperArc>();
-		Set<Node> subNodes = new HashSet<Node>();
-
-		subNodes.add(sink);
-		for (HyperArc arc : solution)
-			subArcs.add(arc);
-		for (HyperArc arc : subArcs)
-			for (Node tail : arc.tails) {
-				Node aux = new Node(tail.name, tail.heads, tail.preds);
-				for (HyperArc auxArc : tail.heads)
-					if (!subArcs.contains(auxArc))
-						aux.removeHead(auxArc);
-				subNodes.add(aux);
-			}
-
-		System.out.println(min);
-		return new HyperGraph(subNodes, subArcs);
-	}
-
-	private int criticalRec(Set<HyperArc> arcSet, int size) {
-		int min = Integer.MAX_VALUE;
-
-		System.out.println(size);
-		Set<Set<HyperArc>> pset = powerSet(arcSet);
-
-		for (Set<HyperArc> set : pset) {
-			clearMarks();
-			for (HyperArc arc : set)
-				arc.mark();
-			if (isSolution()) {
-				int value = 0;
-				for (HyperArc arc : set)
-					value += arc.weight;
-				value = Math.min(value, criticalRec(set, size - 1));
-				min = Math.min(min, value);
-			}
-		}
-		return min;
 	}
 
 	private boolean isSolution() {
@@ -364,12 +317,11 @@ public class HyperGraph {
 		}
 		return false;
 	}
-
+	
 	public int startCriticalPath() {
 
 		Queue<Node> q = new LinkedList<Node>();
-
-		// Recorre, asigna pesos y antecesores
+		
 		source.weight = 0;
 		q.offer(source);
 
@@ -406,22 +358,6 @@ public class HyperGraph {
 				}
 			}
 		}
-
-		Set<HyperArc> subArcs = new HashSet<HyperArc>();
-		Set<Node> subNodes = new HashSet<Node>();
-
-		subNodes.add(sink);
-		for (HyperArc arc : sink.preds)
-			subArcs.add(arc);
-		for (HyperArc arc : subArcs)
-			for (Node tail : arc.tails) {
-				Node aux = new Node(tail.name, tail.heads, tail.preds);
-				for (HyperArc auxArc : tail.heads)
-					if (!subArcs.contains(auxArc))
-						aux.removeHead(auxArc);
-				subNodes.add(aux);
-			}
-		// System.out.println(sink.weight);
 		return sink.weight;
 	}
 

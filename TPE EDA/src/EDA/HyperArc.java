@@ -71,7 +71,13 @@ public class HyperArc implements Comparable<HyperArc>{
 	}
 	
 	public int compareTo(HyperArc o){
-		return this.weight - o.weight;
+		int aux = this.weight - o.weight;
+		if(aux == 0){
+			if(this.name.equals(o.name))
+				return 0;
+			return -1;
+		}
+		return aux;
 	}
 	
 	public boolean equals(Object o){
