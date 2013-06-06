@@ -1,7 +1,6 @@
 package EDA;
 
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,26 +8,12 @@ import java.util.Queue;
 
 public class ApproxAlgs {
 
-	
-	public static void main(String args[]){
-//		HyperGraph hg = new HyperGraph("B.hg");
-//		hg.graphToDot("A");
-//		HyperGraph criticalPath = approxAlg1(hg,hg.sink,0);
-//		hg.criticalToDot("highlightedA", criticalPath);
-//		criticalPath.graphToDot("criticalPathA");
-//		criticalPath.graphToHg("criticalPath");
-		
-	}
-	
-	public static int approxAlg1(HyperGraph graph, Node sink, int time, List<Node> minpathnodes, List<HyperArc> minpath) {
-//		List<HyperArc> minpath = new ArrayList<HyperArc>();
-//		List<Node> minpathnodes = new ArrayList<Node>();
+	public static int minRelAlg(HyperGraph graph, Node sink, int time, List<Node> minpathnodes, List<HyperArc> minpath) {
 		Queue<HyperArc> auxarcs = new LinkedList<HyperArc>();
 		HyperArc arc;
 		int pathweight = 0;
 		Iterator<Node> nodesit;
 		Node node = sink; 
-
 
 		minpathnodes.add(node);
 		arc = minArc(node, minpath);
@@ -43,6 +28,8 @@ public class ApproxAlgs {
 					node = nodesit.next();
 					minpathnodes.add(node);
 					HyperArc nodeminarc = minArc(node,minpath);
+					if(nodeminarc == null)
+						break;
 					if(!nodeminarc.isMarked()){
 						auxarcs.add(nodeminarc);
 						minpath.add(nodeminarc);
@@ -51,18 +38,13 @@ public class ApproxAlgs {
 					}
 				}
 			}
-			//System.out.println(pathweight);
-			//System.out.println(minpathnodes);
-			//System.out.println(minpath);
 			for(Node anode: minpathnodes){
 				anode.mark();
 			}
 			for(HyperArc anarc: minpath){
 				anarc.mark();
 			}
-//			HyperGraph min = new HyperGraph(minpathnodes,minpath);
-//			System.out.println(minpath);
-//			return min;
+
 			return pathweight;
 	}
 
@@ -71,13 +53,11 @@ public class ApproxAlgs {
 		Boolean ready = false;
 		HyperArc arc = new HyperArc(0, null);;
 		HyperArc minarc = new HyperArc(0, null);
-		//if(!arcsIt.hasNext()) ESTO NO LO TIENE QUE HACER NUNCA PORQUE SI NO EL NODO SER�A RAIZ
-//			return false;
 
-		while(arcsIt.hasNext() && !ready){//ESTO ENCUENTRA EL M�NIMO ARCO  O UNO QUE YA EST� MARCADO ARRIBA DE UN NODO
+		while(arcsIt.hasNext()){//ESTO ENCUENTRA EL M�NIMO ARCO  O UNO QUE YA EST� MARCADO ARRIBA DE UN NODO
+			ready = true;
 			arc = arcsIt.next();
 			if(arc.isMarked()){
-				//if(arc != minarc) NO SE SI HACE FALTA ESTO, MEPA QUE NO
 				minarc.unmark();
 				return arc;
 			}
@@ -92,6 +72,8 @@ public class ApproxAlgs {
 				minarc = arc;
 			}
 		}
+		if(!ready)
+			return null;
 		minarc.unmark();
 		return minarc;
 	}
